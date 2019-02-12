@@ -1,0 +1,121 @@
+1. Update server
+$ sudo apt update && sudo apt dist-upgrade
+
+Kemudian reboot server
+$ sudo reboot
+
+2. Install semua pendukung
+Tambahan jika ingin menggunakan lokasi Indonesia configure locale untuk Indonesia, jika tidak bisa langsung ke install aplikasi pendukung
+
+$ sudo locale-gen id_ID.UTF-8
+$ sudo dpkg-reconfigure locales
+
+Install aplikasi pendukung
+$ sudo apt install python-pip python-dev libevent-dev gcc libxml2-dev node-less python-cups python-dateutil python-decorator python-docutils python-feedparser python-gdata python-geoip python-gevent python-jinja2 python-ldap python-libxslt1 python-lxml python-mako python-mock python-openid python-passlib python-psutil python-psycopg2 python-pychart python-pydot python-pyparsing python-reportlab python-requests python-simplejson python-tz python-unicodecsv python-unittest2 python-vatnumber python-vobject python-werkzeug python-xlwt python-yaml python-babel python-pil
+$ sudo pip install pypdf
+
+Install wkhtmltopdf untuk keperluan print ke pdf:
+$ sudo apt install fontconfig fontconfig-config fonts-dejavu-core libfontconfig1 libfontenc1 libjpeg-turbo8 libxrender1 x11-common xfonts-75dpi xfonts-base
+
+Jika menggunakan versi 64-bit.
+$ wget https://downloads.wkhtmltopdf.org/0.12/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb
+
+$ sudo dpkg -i wkhtmltox_0.12.5-1.bionic_amd64.deb
+
+kemudian setelah download wkhtmltx
+
+$ sudo cp /usr/local/bin/wkhtmltopdf /usr/bin
+
+$ sudo cp /usr/local/bin/wkhtmltoimage /usr/bin
+
+Estimasi waktu install tergantung kecepatan internet kamu. Sekarang Odoo 10 sudah tercukupi kebutuhan pendukungnya.
+
+3. Buat akun baru untuk user Odoo 10
+$ sudo adduser --system --home=/opt/odoo10 --group odoo10
+
+4. Install Postgresql dan buat akun user Odoo 10 untuk Postgresql
+$ sudo apt install postgresql
+$ sudo su - postgres
+$ createuser --createdb --username postgres --no-createrole --no-superuser --pwprompt odoo10
+$ exit
+
+5. Ambil Odoo 10 dari sumber repository
+$ sudo apt install git
+$ sudo su - odoo10 -s /bin/bash
+$ git clone https://www.github.com/odoo/odoo --depth 1 --branch 10.0 --single-branch .
+
+cloning into folder odoo
+
+Estimasi waktu install tergantung kecepatan internet kamu.
+
+6. Ubah parameter konfigurasi Odoo 10
+Setelah proses checkout selesai, kamu perlu membuat sebuah file konfigurasi Odoo 10 dengan,
+
+### Jangan Lupa Titik di belakang
+
+$ ./odoo-bin --addons-path=addons -s
+Kemudian tekan tombol CTRL+C
+
+Perintah di atas akan membuat sebuah file konfigurasi dengan nama file .openerp_serverrc kemudian salin file tersebut ke direktori /etc/
+
+$ exit
+
+$ sudo mv /opt/odoo10/.odoorc /etc/odoo10-server.conf
+
+Kemudian edit file tersebut dengan parameter sesuai dengan kebutuhan.
+
+$ sudo nano /etc/odoo10-server.conf
+
+Untuk contoh parameter yang diganti:
+
+logfile = /var/log/odoo/odoo10-server.log
+
+addons_path = /opt/odoo10/addons
+
+Buat folder baru untuk penyimpan file log
+
+$ sudo mkdir /var/log/odoo
+
+$ sudo chown odoo10:root /var/log/odoo
+
+7. Membuat OpenERP sebagai service
+$ sudo cp /opt/odoo10/debian/init /etc/init.d/odoo10
+$ sudo nano /etc/init.d/odoo10
+
+##### /etc/init.d/odoo10 : odoo10 adalah nama service jadi ubah sesuai keinginan
+Ubah
+
+DAEMON=/usr/bin/odoo.py
+CONFIG=/etc/openerp/openerp-server.conf
+
+menjadi
+
+...
+DAEMON=/opt/odoo10/odoo-bin
+NAME=odoo10
+DESC=odoo10
+CONFIG=/etc/odoo10-server.conf
+LOGFILE=/var/log/odoo/odoo10-server.log
+PIDFILE=/var/run/${NAME}.pid
+USER=odoo10
+...
+
+Simpan file dan keluar. Kemudian ubah hak aksesnya agar bisa di eksekusi,
+
+sudo chmod 755 /etc/init.d/odoo10
+
+8. Menjadikan Odoo 10 sebagai Service
+sudo update-rc.d odoo10 defaults
+
+Restart server
+
+sudo reboot
+
+9. Tes Odoo 10 melalui browser
+Setelah semua proses selesai, buka Odoo 10 melalui browser, secara default http://alamatip:8069, contoh
+
+http://192.168.1.200:8069
+
+Default Master password : admin (ubah lah segera untuk keamanan)
+
+Jika ada kendala tolong beritahu saya, kamu bisa menghubungi saya melalui kolom komentar di bawah artikel ini.
